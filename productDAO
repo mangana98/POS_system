@@ -1,0 +1,80 @@
+package pos.db;
+
+import pos.model.Product;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;public class ProductDAO {
+
+    public static List<Product> getAllProducts() {
+        List<Product> list = new ArrayList<>();
+
+        try (Connection conn = DBConnection.getConnection()) {
+            String sql = "SELECT * FROM products";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(new Product(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getDouble("price"),
+                        rs.getInt("stock"),
+                        rs.getString("image_path")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public static void addProduct(Product p) {
+        try (Connection conn = DBConnection.getConnection()) {
+
+            String sql = "INSERT INTO products(name, price, stock, image_path) VALUES(?,?,?,?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, p.getName());
+            ps.setDouble(2, p.getPrice());
+            ps.setInt(3, p.getQuantityInStock());
+            ps.setString(4, p.getImagePath());
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateStock(int id, int stock) {
+        try (Connection conn = DBConnection.getConnection()) {
+
+            String sql = "UPDATE products SET stock=? WHERE id=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setInt(1, stock);
+            ps.setInt(2, id);
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteProduct(int id) {
+        try (Connection conn = DBConnection.getConnection()) {
+
+            String sql = "DELETE FROM products WHERE id=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
